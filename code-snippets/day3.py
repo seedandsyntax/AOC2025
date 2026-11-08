@@ -154,7 +154,21 @@ The algorithm we got assumed that all the cases where H <= L, disregarding D wou
 This is wrong, in case of H >= L > D, we MUST ignore!
 let me update that...
 
-SUCCESS! 
+SUCCESS! part 1 done!
+
+Oh well, part 2 now wants 12 of highest digits instead of two, can we generalize our learned knowledge?
+I suppose we can think of a different way, in this scenario rather than 12 let us consider 4:
+
+315323313364
+check from back, we firstly get:
+- 3364
+- 1336 (drop 4 from set of [3, 3, 6, 4])
+- 3136 (drop 1 from set of [1, 3, 3, 6], because it is less)
+- 2336 (drop 1 from set of [3, 6, 3, 1] , because it is less)
+- 3336 (drop 1 from set of [2, 6, 3, 1] , because it is less)
+oh well, this is complicated now... wait if I consider this as list to drop lowest only from, then somehow it seems to work...
+let me implement that now...
+but wait, this ignores incoming digit to be checked as well, OH WAIT, just check for lowest among all of them, drop accordingly!
 """
 inputs_list: list[str] = []
 with open("./code-snippets/day3data.txt", 'r') as fr:
@@ -170,6 +184,7 @@ sample_inputs_list: list[str] = [
 ]
 
 batteries_set_to_sum: list[int] = []
+override_batt_set_to_sum: list[int] = []
 
 for usin in inputs_list:
     higher_place_value: int = int(usin[0])
@@ -186,3 +201,19 @@ for usin in inputs_list:
 
 print(batteries_set_to_sum)
 print(sum(batteries_set_to_sum))
+
+for usin in sample_inputs_list:
+    limit_of_set: int = 12
+    temp_dropper_set: list[int] = [int(digit) for digit in list(usin[-limit_of_set:])]
+    for digit in range(len(usin) - len(temp_dropper_set), -1, -1):
+        temp_dropper_set.insert(0, int(usin[digit]))
+        print(f"usin: {usin} => {temp_dropper_set}")
+        idx_of_dropped_digit = -1 # assumed the last digit in dropped list, we will iterate from the back.
+        for iter_digit in range(len(temp_dropper_set) -1 , 0, -1):
+            if temp_dropper_set[idx_of_dropped_digit] > temp_dropper_set[iter_digit]:
+                idx_of_dropped_digit = iter_digit
+        temp_dropper_set.pop(idx_of_dropped_digit)
+    batt_combo: str = "".join([str(digit) for digit in temp_dropper_set])
+    override_batt_set_to_sum.append(int(batt_combo))
+print(override_batt_set_to_sum)
+print(sum(override_batt_set_to_sum))
