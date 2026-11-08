@@ -47,6 +47,21 @@ This means there are cases:
 - When checked number is larger than both higher_place_value and lower_place_value, update with higher_place_value = lower_place_value then lower_place_value = checked value.
 - When checked number is larger than higher_place_value but smaller than lower_place_value, same as prior case, update with higher_place_value = lower_place_value then lower_place_value = checked value.
 
+Welp we are off, we need 357 and got 287.
+It looks like out output works for the first and last case but wait! we formulated exactly the largest possible in the else case we stated long ago.
+But why did this failed? let me dry run again:
+8119 =>
+- assumed 8 and 1
+- oh wait we are checking from the start! we should not!
+- but that doesn't fixes the issue, so we shall continue
+- the third place one triggers replacement of lower only, but there's barely any value of that...
+- the last digit triggers lower to be 9 but also gives its value of 1 to higher, this is a bug we didn't want...
+- this will be valid for scenarios when higher > lower but lower stumbles upon smth higher than both higher and lower.
+- This mean the fix is within the case number 3, we assumed lower to be larger, and thus a replacement. I could add another if statement to ensure that doesn't happen.
+Wait, I see this as a states problem, we could add a new case with side to it than nest more if statements inside.
+so sub cases that will side adjacent with other cases will be:
+- If higher > lower and we get digit > lower < higher, then lower = digit only!
+- If higher < lower and we get digit > lower > higher, then we do what we were doing...
 """
 
 with open("./code-snippets/day3data.txt", 'r') as fr:
@@ -64,13 +79,20 @@ batteries_set_to_sum: list[int] = []
 for usin in sample_inputs_list:
     higher_place_value: int = int(usin[0])
     lower_place_value: int = int(usin[1])
-    for digit in usin:
+    for digit in usin[2:]:
         num_digit: int = int(digit)
         if (
-            higher_place_value <= num_digit >= lower_place_value or 
-            higher_place_value <= num_digit <= lower_place_value
+            ( higher_place_value <= num_digit >= lower_place_value or 
+            higher_place_value <= num_digit <= lower_place_value ) and
+            higher_place_value <= lower_place_value <= num_digit
                 ):
             higher_place_value = lower_place_value
+            lower_place_value = num_digit
+        elif (
+            ( higher_place_value <= num_digit >= lower_place_value or 
+            higher_place_value <= num_digit <= lower_place_value ) and
+            higher_place_value <= lower_place_value <= num_digit
+                ):
             lower_place_value = num_digit
         elif higher_place_value >= num_digit >= lower_place_value:
             lower_place_value = num_digit
