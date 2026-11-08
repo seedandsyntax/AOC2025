@@ -89,7 +89,7 @@ Oh My text file itself had extra \n, that's why it could not do it.
 The answer given out was 17250 but this isn't right, this implies that there are cases I must consider and not ignore!
 
 We must work all the cases ever possible, hmmm:
-- we got 3 states and 2 checks, we could conduct permutations through 4 checks:
+- we got 3 states and 4 checks, we could conduct permutations through 4 checks:
 placing all states in this order:
 H <= L <= D 
 H >= L <= D 
@@ -110,8 +110,51 @@ L >= H >= D
 
 ...
 
-Do we really care about all of them? there's like (3 * 2 * 1) * 2 = 12 different if else checks I need to write for.
+Do we really care about all of them? there's like (3 * 2 * 1) * 4 = 24 different if else checks I need to write for.
 You know what, I will do it!
+
+wait, this doesn't seems right, there are some ambiguous checks which I should simply ignore, reducing permutations from 24 to 12.
+but then what values could possibly escape? let me check by a dry run:
+2313241 =>
+- 2 and 3 and 1 no update
+- 2 and 3 and 3 update H = 3, L = 3
+- 3 and 3 and 2 no update
+- 3 and 3 and 4 update H = 3, L = 4
+- 3 and 4 and 1 update H = 4, L = 1
+- maximum is 41 here, seems fine.
+231361 =>
+- 2 and 3 and 1 no update
+- 2 and 3 and 3 update H = 3, L = 3
+- 3 and 3 and 6 update H = 3, L = 6
+- 3 and 6 and 1 update H = 3, L = 6
+........
+oh I figured... it should be simpler then,
+whenever higher > lower (but not equal or greater) then we ignore if lower > digit, else we just update lower = digit.
+in latter situation where higher <= lower, we update both no matter if lower is less, large or equal to the digit, like H = L then L = D.
+
+let me write that out too.
+this is significantly trimmed out, and gives exact value as before, which means we got much optimal setting than our prior case check.
+We are definitely missing a case then, or smth else, I should peek into those massive sets of data now.
+those sets are super massive, let me try trimming then iterate upon smth:
+5657323833536351353333363782336373322831333642333243533331333328332333353233285222557336315323313364
+5 6 5 no update
+5 6 7 update to 6 7
+6 7 3 update to 7 3
+...
+skipping until 83...
+7 3 8 update to 7 8
+7 8 3 update to 8 3
+...
+skipping until 85...
+8 5 8 update to 8 (this happened in the past which means it will be 8 8 8 check now)
+8 8 8 update to 8 8 (the else if plays)
+8 8 5 update to 8 5 (HIT, WE GOT WHAT CAUSED IT!)
+
+The algorithm we got assumed that all the cases where H <= L, disregarding D would lead to H = L and then L = D 
+This is wrong, in case of H >= L > D, we MUST ignore!
+let me update that...
+
+SUCCESS! 
 """
 inputs_list: list[str] = []
 with open("./code-snippets/day3data.txt", 'r') as fr:
@@ -133,29 +176,11 @@ for usin in inputs_list:
     lower_place_value: int = int(usin[1])
     for digit in usin[2:]:
         num_digit: int = int(digit)
-        if (
-                (higher_place_value <= lower_place_value <= num_digit) or
-                (higher_place_value <= lower_place_value >= num_digit) or
-                (lower_place_value <= higher_place_value <= num_digit) or
-                (higher_place_value <= num_digit <= lower_place_value)
-        ):
+        if (higher_place_value >= lower_place_value) and lower_place_value < num_digit:
+            lower_place_value = num_digit
+        elif (higher_place_value < lower_place_value):
             higher_place_value = lower_place_value
             lower_place_value = num_digit
-        elif (
-                (higher_place_value >= lower_place_value <= num_digit) or
-                (higher_place_value >= num_digit >= lower_place_value)
-        ):
-            lower_place_value = num_digit
-        elif(
-                (higher_place_value >= lower_place_value >= num_digit) or
-                (lower_place_value >= higher_place_value >= num_digit) or 
-                (lower_place_value <= higher_place_value >= num_digit) or
-                (lower_place_value >= higher_place_value <= num_digit)
-        ):
-            # These iterations are either useless or ambiguous.
-            continue
-        elif ():
-            continue
 
     batteries_set_to_sum.append(higher_place_value * 10 + lower_place_value)
 
