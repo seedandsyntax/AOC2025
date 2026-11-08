@@ -45,7 +45,7 @@ def check_invalid(check_num: int) -> bool:
 
     oh right, so my concern was wrongly put, all numbers in example range of 2121212118-2121212124 would had been true because there is "some" repeating digits... but they want to see sequence in entire number.
     I would simply keep slicing original to parts and compare...
-    dry run: 
+    dry run:
     - 12345 => 1-2-3-4-5 (iteration == 1, digit_count == 5, digit_count % iteration = 0)
     - 12345 => 12-34-5 -----> auto rejection! (iteration == 2, digit_count == 5, digit_count % iteration = 1)
     - 12345 => 123-45 -----> auto rejection! (iteration == 3, digit_count == 5, digit_count % iteration = 2) ### WE SHOULD HALT HERE... I would put a condition for that too...
@@ -58,6 +58,8 @@ def check_invalid(check_num: int) -> bool:
 
     wait, it accepts all the conditions below 3 digits! and rejects all beyond 3 digits, this is completely wrong...
     oh well, we might be doing it wrong, we are not allowing it to check and ending its trials before hand!
+
+    partial success! however numbers like 446446 can't be matched!... implies that iterations perhaps end faster... let me check by targetting 446446...
     """
 
     str_num: str = str(check_num)
@@ -73,8 +75,9 @@ def check_invalid(check_num: int) -> bool:
         for set_check in range(0, digit_count, iteration):
             if set_check + iteration * 2 > digit_count:
                 break
-            # print(f"set_check: {set_check} iter: {iteration} digits: {digit_count}")
-            # print(f"str_num[{set_check}: {set_check + iteration}] str_num[{set_check + iteration}: {set_check + iteration * 2}]")
+            if str_num == '446446':
+                print(f"set_check: {set_check} iter: {iteration} digits: {digit_count}")
+                print(f"str_num[{set_check}: {set_check + iteration}] str_num[{set_check + iteration}: {set_check + iteration * 2}]")
             if str_num[set_check: set_check + iteration] != str_num[set_check + iteration: set_check + iteration * 2]:
                 # print(f"{str_num[set_check: set_check + iteration]} ?= {str_num[set_check + iteration: set_check + iteration * 2]}")
                 seq_found_trigger = False
