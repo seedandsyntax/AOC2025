@@ -33,14 +33,56 @@ def check_invalid(check_num: int) -> bool:
     I would convert it back to string and simplify the checks.
 
     SUCCESS
+
+    Part 2 makes the odd assumption revoked, we need to now remove that segment.
+    The rule is more inclusive of patterns with "any repeating set of digits (2 or more than 2)"
+    So I will remove the direct splicing too.
+
+    There's only brute-force way I could think of as of now...
+    There's an interesting example of `565656` which has 6565 oh wait I realised this isn't special case! lol, detection of such pair might require a way...
+    But won't that be too much for brute-force? if it is then I shall search up a mathematical method for it...
+    I had an oversight, the sequence is 565656 so there's 3 repetitions... this might be easy to brute-force...
+
+    oh right, so my concern was wrongly put, all numbers in example range of 2121212118-2121212124 would had been true because there is "some" repeating digits... but they want to see sequence in entire number.
+    I would simply keep slicing original to parts and compare...
+    dry run: 
+    - 12345 => 1-2-3-4-5 (iteration == 1, digit_count == 5, digit_count % iteration = 0)
+    - 12345 => 12-34-5 -----> auto rejection! (iteration == 2, digit_count == 5, digit_count % iteration = 1)
+    - 12345 => 123-45 -----> auto rejection! (iteration == 3, digit_count == 5, digit_count % iteration = 2) ### WE SHOULD HALT HERE... I would put a condition for that too...
+    - 12345 => 1234-5 -----> auto rejection! (iteration == 4, digit_count == 5, digit_count % iteration = 1)
+    - 12345 => 12345 -----> auto rejection! (iteration == 5, digit_count == 5, digit_count % iteration = 0)
+
+    this allowed 12 to pass, how?:
+    - 12 => 1-2 (iteration == 1, digit_count == 2, digit_count % iteration = 0)
+    - 12 => 12 (iteration == 2, digit_count == 2, digit_count % iteration = 0) ???
+
+    wait, it accepts all the conditions below 3 digits! and rejects all beyond 3 digits, this is completely wrong...
+    oh well, we might be doing it wrong, we are not allowing it to check and ending its trials before hand!
     """
-    temp_num: str = str(check_num)
-    if len(temp_num) % 2 != 0:
-        return False
-    mid_way: int = int(len(temp_num) / 2)
-    # print(f"{temp_num[0:mid_way] } ?= { temp_num[mid_way:]}")
-    if temp_num[0:mid_way] == temp_num[mid_way:]:
-        return True
+
+    str_num: str = str(check_num)
+    digit_count: int = len(str_num)
+    for iteration in range (1, int(digit_count / 2)):
+        print("NUMBER: ", check_num)
+        seq_found_trigger: bool = True # assume the said sequence exists.
+        # print(f"iter: {iteration} digits: {digit_count} int-digits:{int(digit_count/2)}")
+        if int(digit_count / 2) < iteration:
+            return False
+        if digit_count % iteration != 0:
+            continue
+        for set_check in range(0, digit_count, iteration):
+            if set_check + iteration * 2 > digit_count:
+                break
+            # print(f"set_check: {set_check} iter: {iteration} digits: {digit_count}")
+            # print(f"str_num[{set_check}: {set_check + iteration}] str_num[{set_check + iteration}: {set_check + iteration * 2}]")
+            if str_num[set_check: set_check + iteration] != str_num[set_check + iteration: set_check + iteration * 2]:
+                # print(f"{str_num[set_check: set_check + iteration]} ?= {str_num[set_check + iteration: set_check + iteration * 2]}")
+                seq_found_trigger = False
+                break # break the current iteration and turn the assumption for this iteration as false.
+        if seq_found_trigger:
+            print("invalid: ", check_num)
+            return True
+
     return False
 
 invalid_list: list = []
@@ -60,4 +102,4 @@ def sum_invalid(id_set: str) -> int:
     return sum(invalid_list)
 
 if __name__ == "__main__":
-    sum_invalid(actual_set)
+    sum_invalid(example_set)
