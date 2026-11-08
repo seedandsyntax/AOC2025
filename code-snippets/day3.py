@@ -62,6 +62,24 @@ Wait, I see this as a states problem, we could add a new case with side to it th
 so sub cases that will side adjacent with other cases will be:
 - If higher > lower and we get digit > lower < higher, then lower = digit only!
 - If higher < lower and we get digit > lower > higher, then we do what we were doing...
+Hmmmm it seems to now give 81 instead of 89... it should update as per... wait... I didn't changed the checks' conditions.
+Wow, so cutting one bug causes another now, we got an issue now with the 4th case. it should give 92 but gives 89
+
+Ok, it is actually correct! the way the algorithm works gives us largest two digit numbers, but it is blind from totality of how there simply can be larger numbers.
+This complicate things, it seems to be a completely alien to cases we got. 
+
+wait... there might be a way? We are assuming higher to be "higher" because its weightage will be X10 than normal.
+we should try to compare it as if the higher is actually, always 10 times, this splits the checks even further...
+
+now the check will have higher compared with digit separately, where higher will ... wait this doesn't seems to work... 
+
+I could also put a completely different if conditional where it will keep on checking if the digit, lower and higher after all the conditions could be replaced like this?
+Yes, that seems plausible, wait hold up...
+
+this condition is hit if lower > higher > digit, is this case covered? Is this true for all those one? apparently yes,
+1231 =>
+- 31 here must be highest, at the end the lower > higher > digit condition is hit: 3 > 2 > 1
+our program simply ignores it, let me add that too.
 """
 
 with open("./code-snippets/day3data.txt", 'r') as fr:
@@ -91,13 +109,15 @@ for usin in sample_inputs_list:
         elif (
             ( higher_place_value <= num_digit >= lower_place_value or 
             higher_place_value <= num_digit <= lower_place_value ) and
-            higher_place_value <= lower_place_value <= num_digit
+            higher_place_value >= lower_place_value <= num_digit
                 ):
             lower_place_value = num_digit
         elif higher_place_value >= num_digit >= lower_place_value:
             lower_place_value = num_digit
-        else:
-            continue # ignoring that first case!
+        elif lower_place_value >= higher_place_value >= num_digit:
+            higher_place_value = lower_place_value
+            lower_place_value = num_digit
+
     batteries_set_to_sum.append(higher_place_value * 10 + lower_place_value)
 
 print(batteries_set_to_sum)
