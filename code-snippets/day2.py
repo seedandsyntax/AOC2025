@@ -60,11 +60,24 @@ def check_invalid(check_num: int) -> bool:
     oh well, we might be doing it wrong, we are not allowing it to check and ending its trials before hand!
 
     partial success! however numbers like 446446 can't be matched!... implies that iterations perhaps end faster... let me check by targetting 446446...
+    ```
+    set_check: 0 iter: 1 digits: 6
+    str_num[0: 1] str_num[1: 2]
+    set_check: 1 iter: 1 digits: 6
+    str_num[1: 2] str_num[2: 3]
+    NUMBER:  446446
+    set_check: 0 iter: 2 digits: 6
+    str_num[0: 2] str_num[2: 4]
+    ```
+    as suspected, iteration ends before going to third let us allow it to go to the third.
+
+    SUCCESS! WE GOT IT.
+    This is taking a while because of string based brute-force... but after about 30 seconds of processing we get 38731915928.
     """
 
     str_num: str = str(check_num)
     digit_count: int = len(str_num)
-    for iteration in range (1, int(digit_count / 2)):
+    for iteration in range (1, int(digit_count / 2) + 1): # for 446446 this will go range(1, 3, 1) but that is a problem! 3rd is not inclusive and hence we shall add a plus 1.
         print("NUMBER: ", check_num)
         seq_found_trigger: bool = True # assume the said sequence exists.
         # print(f"iter: {iteration} digits: {digit_count} int-digits:{int(digit_count/2)}")
@@ -105,4 +118,4 @@ def sum_invalid(id_set: str) -> int:
     return sum(invalid_list)
 
 if __name__ == "__main__":
-    sum_invalid(example_set)
+    sum_invalid(actual_set)
