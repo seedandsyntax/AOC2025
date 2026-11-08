@@ -11,6 +11,7 @@ approach 1st:
 
 Done with the range creation, now we need a boolean function that returns true for invalid conditions.
 
+OH THE RANGE IS INCLUSIVE TOO! We just needed to add a plus one to make the range syntax include the ending integer included as well!
 """
 
 def check_invalid(check_num: int) -> bool:
@@ -30,6 +31,8 @@ def check_invalid(check_num: int) -> bool:
     firstly, we need a way to count digits itself, does 'int' class has anything useful to use? let me look up...
     I don't see anything which can directly give us advantage in the class itself from basic documentation search.
     I would convert it back to string and simplify the checks.
+
+    SUCCESS
     """
     temp_num: str = str(check_num)
     if len(temp_num) % 2 != 0:
@@ -42,12 +45,19 @@ def check_invalid(check_num: int) -> bool:
 
 invalid_list: list = []
 
-list_of_ranges = [str_range_set.group().split('-') for str_range_set in re.finditer(r"\d+\-\d+", example_set)]
-for str_range_set in list_of_ranges:
-    temp_list: list = [int(range_item) for range_item in str_range_set]
-    temp_list.append(1)
-    range_set: range = range(temp_list[0], temp_list[1], temp_list[2])
-    # print(range(temp_list[0], temp_list[0], temp_list[0]))
-    invalid_list.extend([invalid for invalid in range_set if check_invalid(invalid)])
-    print(invalid_list)
-    
+def sum_invalid(id_set: str) -> int:
+    """
+    Success on part 1 of this challenge!
+    """
+    list_of_ranges = [str_range_set.group().split('-') for str_range_set in re.finditer(r"\d+\-\d+", id_set)]
+    for str_range_set in list_of_ranges:
+        temp_list: list = [int(range_item) for range_item in str_range_set]
+        temp_list.append(1)
+        range_set: range = range(temp_list[0], temp_list[1]+1, temp_list[2])
+        # print(range(temp_list[0], temp_list[0], temp_list[0]))
+        invalid_list.extend([invalid for invalid in range_set if check_invalid(invalid)])
+    print("Invalid ID's sum is: ", sum(invalid_list))
+    return sum(invalid_list)
+
+if __name__ == "__main__":
+    sum_invalid(actual_set)
