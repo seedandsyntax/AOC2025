@@ -80,10 +80,44 @@ this condition is hit if lower > higher > digit, is this case covered? Is this t
 1231 =>
 - 31 here must be highest, at the end the lower > higher > digit condition is hit: 3 > 2 > 1
 our program simply ignores it, let me add that too.
-"""
 
+I am losing track let me see if I described the ignored state like that:
+> - When checked number is smaller than both higher_place_value and lower_place_value, ignore.
+this translates to: digit < higher and digit < lower, but it does not speak about things in between.
+I suppose all the rest of non-written cases could be ignored now... lets see.
+Oh My text file itself had extra \n, that's why it could not do it.
+The answer given out was 17250 but this isn't right, this implies that there are cases I must consider and not ignore!
+
+We must work all the cases ever possible, hmmm:
+- we got 3 states and 2 checks, we could conduct permutations through 4 checks:
+placing all states in this order:
+H <= L <= D 
+H >= L <= D 
+H <= L >= D 
+H >= L >= D 
+
+now we add more with swapping as well...
+
+H <= L <= D 
+H >= L <= D 
+H <= L >= D 
+H >= L >= D 
+
+L <= H <= D 
+L >= H <= D 
+L <= H >= D 
+L >= H >= D 
+
+...
+
+Do we really care about all of them? there's like (3 * 2 * 1) * 2 = 12 different if else checks I need to write for.
+You know what, I will do it!
+"""
+inputs_list: list[str] = []
 with open("./code-snippets/day3data.txt", 'r') as fr:
-    inputs_list: list[str] = fr.readlines()
+    inputs_list = fr.readlines()
+
+inputs_list = [usin.rstrip('\n') for usin in inputs_list]
 
 sample_inputs_list: list[str] = [
     "987654321111111",
@@ -94,29 +128,34 @@ sample_inputs_list: list[str] = [
 
 batteries_set_to_sum: list[int] = []
 
-for usin in sample_inputs_list:
+for usin in inputs_list:
     higher_place_value: int = int(usin[0])
     lower_place_value: int = int(usin[1])
     for digit in usin[2:]:
         num_digit: int = int(digit)
         if (
-            ( higher_place_value <= num_digit >= lower_place_value or 
-            higher_place_value <= num_digit <= lower_place_value ) and
-            higher_place_value <= lower_place_value <= num_digit
-                ):
+                (higher_place_value <= lower_place_value <= num_digit) or
+                (higher_place_value <= lower_place_value >= num_digit) or
+                (lower_place_value <= higher_place_value <= num_digit) or
+                (higher_place_value <= num_digit <= lower_place_value)
+        ):
             higher_place_value = lower_place_value
             lower_place_value = num_digit
         elif (
-            ( higher_place_value <= num_digit >= lower_place_value or 
-            higher_place_value <= num_digit <= lower_place_value ) and
-            higher_place_value >= lower_place_value <= num_digit
-                ):
+                (higher_place_value >= lower_place_value <= num_digit) or
+                (higher_place_value >= num_digit >= lower_place_value)
+        ):
             lower_place_value = num_digit
-        elif higher_place_value >= num_digit >= lower_place_value:
-            lower_place_value = num_digit
-        elif lower_place_value >= higher_place_value >= num_digit:
-            higher_place_value = lower_place_value
-            lower_place_value = num_digit
+        elif(
+                (higher_place_value >= lower_place_value >= num_digit) or
+                (lower_place_value >= higher_place_value >= num_digit) or 
+                (lower_place_value <= higher_place_value >= num_digit) or
+                (lower_place_value >= higher_place_value <= num_digit)
+        ):
+            # These iterations are either useless or ambiguous.
+            continue
+        elif ():
+            continue
 
     batteries_set_to_sum.append(higher_place_value * 10 + lower_place_value)
 
