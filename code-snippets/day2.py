@@ -13,7 +13,32 @@ Done with the range creation, now we need a boolean function that returns true f
 
 """
 
+def check_invalid(check_num: int) -> bool:
+    """
+    So we need to check half of the digits on left and right to be the same.
+    This eliminates all the odd number of digits situations, even 999 was not shown as 'invalid'.
+    let me iterate some invalid examples:
+    -> 99 = 90 + 9
+    -> 9191 = 9100 + 91
+    -> 261261 = 261000 + 261
+    ...
 
+    we can get 'dddd' to reduce to 'dd00' by modulus?
+    dddd % 100 = '00dd'!
+    no we get the opposite end, wait I shall keep that latter part too.
+    So if we did dddd - (dddd  % 100) => 'dd00', that does work, we just need to now make this for d+ situation.
+    firstly, we need a way to count digits itself, does 'int' class has anything useful to use? let me look up...
+    I don't see anything which can directly give us advantage in the class itself from basic documentation search.
+    I would convert it back to string and simplify the checks.
+    """
+    temp_num: str = str(check_num)
+    if len(temp_num) % 2 != 0:
+        return False
+    mid_way: int = int(len(temp_num) / 2)
+    # print(f"{temp_num[0:mid_way] } ?= { temp_num[mid_way:]}")
+    if temp_num[0:mid_way] == temp_num[mid_way:]:
+        return True
+    return False
 
 invalid_list: list = []
 
@@ -23,5 +48,6 @@ for str_range_set in list_of_ranges:
     temp_list.append(1)
     range_set: range = range(temp_list[0], temp_list[1], temp_list[2])
     # print(range(temp_list[0], temp_list[0], temp_list[0]))
-    invalid_list.extend([invalid for invalid in range_set])
+    invalid_list.extend([invalid for invalid in range_set if check_invalid(invalid)])
     print(invalid_list)
+    
