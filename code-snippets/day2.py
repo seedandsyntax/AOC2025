@@ -72,7 +72,7 @@ def check_invalid(check_num: int) -> bool:
     as suspected, iteration ends before going to third let us allow it to go to the third.
 
     SUCCESS! WE GOT IT.
-    This is taking a while because of string based brute-force... but after about 30 seconds of processing we get 38731915928.
+    This is taking a while because of string based brute-force... but after about 30 seconds of processing we get [REDACTED].
     """
 
     str_num: str = str(check_num)

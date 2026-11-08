@@ -1,0 +1,82 @@
+import re
+"""
+This day problem has a string of numbers, and we need to simply 
+- Find largest 2 single digits.
+- Combine them sequencially (giving higher place value to the first of the found numbers in the prior set.)
+- Sum all the numbers up.
+
+We will approach by taking the string value of the problem, in this case I will read it through the text file because this one has huge inputs.
+Now I need to get a sample set as well... because checking before pure execution is better.
+I shall go over the characters of pure digits twice, first to get the initial largest then a modified format of it which won't have the largest in its index.
+wait, we will be storing the index anyways, we could try going through it once, store index of the largest, when a new, larger value arrives... wait.
+we can:
+- Assume starting to be largest.
+- if another largest is found, update the index to pull value from, this is basic of what first search will get us.
+- The second would simply not have the value that the first search got, but this doesn't matter to us, what matters is we get the remaining largest's index.
+- It can be assumed as well that the second largest isn't the assumed first largest, 
+  - so as the values of assumed get thrown away, we simply point the prior assumption to be the larger place value (because we are traversing left to right).
+This makes sense let me do a little dry run:
+- 81119 => 
+  assume 8 is larger, initially, wait.. if is it were to be 91118, then our algorithm could return 19 instead of 91!
+We need a better plan, it is true that the former assumption at the very beginning is true too, our algorithm is solid for the moments this wasn't true!
+because this is an binary scenario, throwing a state check won't be a hassle, I will simply see if we falter for that situation, if we do we would loop back for the value...
+wait, if 9 is largest in 91118, then we can also say that there can't be larger single digit number digit than this, it is impossible.
+This implies that 9 will always be the starting position no matter the cost.
+This indicates that perhaps, just maybe... we could turn the checking upside-down? I should try assuming that the larger place value digit is found first!
+so in this case, it is safe to assume that the other one would be smaller...
+
+wait what am I doing... I mean I could try these methods but I suppose I tunneled visioned, I should simply sort this in descending order and get... wait! That's a trap...
+sorting kills the order! But this gives me a little out of box vision too, I could try prying away what I don't need from here, hmmm...
+I was thinking of removing each unique digit one at a time, storing each unique one away until the string goes empty,
+- our solution could be the last two unique taken out,
+- but that is wrong too because it gets uniques where the solution is allowed to have duplicates.
+
+I shall go back to what I was thinking, that is the way,
+lets do the dry run again:
+- 7239 =>
+  assume 7 is larger placevalue digit, 2 is assumed to be smaller, 
+  we go forward and find 3 > 2, so we just update lower place value.
+  we go forward and find 9 > 3 as well as 9 > 7, so we update lower place value with a 9.
+  as 7 < 3 and 7 < 2 we never updated 7.
+but if we had 72399 =>
+  we would now step to 9 >= 9 and 9 >= 7 as well, this updates 7 to be prior found 9 as well.
+  this works! This seems to be how it is meant to be done.
+This means there are cases:
+- When checked number is smaller than both higher_place_value and lower_place_value, ignore.
+- When checked number is smaller than higher_place_value but larger than lower_place_value, update lower_place_value to be the value checked.
+- When checked number is larger than both higher_place_value and lower_place_value, update with higher_place_value = lower_place_value then lower_place_value = checked value.
+- When checked number is larger than higher_place_value but smaller than lower_place_value, same as prior case, update with higher_place_value = lower_place_value then lower_place_value = checked value.
+
+"""
+
+with open("./code-snippets/day3data.txt", 'r') as fr:
+    inputs_list: list[str] = fr.readlines()
+
+sample_inputs_list: list[str] = [
+    "987654321111111",
+    "811111111111119",
+    "234234234234278",
+    "818181911112111"
+]
+
+batteries_set_to_sum: list[int] = []
+
+for usin in sample_inputs_list:
+    higher_place_value: int = int(usin[0])
+    lower_place_value: int = int(usin[1])
+    for digit in usin:
+        num_digit: int = int(digit)
+        if (
+            higher_place_value <= num_digit >= lower_place_value or 
+            higher_place_value <= num_digit <= lower_place_value
+                ):
+            higher_place_value = lower_place_value
+            lower_place_value = num_digit
+        elif higher_place_value >= num_digit >= lower_place_value:
+            lower_place_value = num_digit
+        else:
+            continue # ignoring that first case!
+    batteries_set_to_sum.append(higher_place_value * 10 + lower_place_value)
+
+print(batteries_set_to_sum)
+print(sum(batteries_set_to_sum))
